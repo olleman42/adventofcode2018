@@ -52,8 +52,35 @@ func main() {
 	log.Println(ugh.id * ugh.totalSleepTime)
 	// walk through all minutes in an hour and see if it's inside any of this guard's intervals
 	//minuteCounter := make([]int, 0)
-	sleepiestMinute := 0
-	sleepiestIndex := 0
+	// sleepiestMinute := 0
+	// sleepiestIndex := 0
+	// for m := 0; m < 60; m++ {
+	// 	fakeMinute := strconv.Itoa(m)
+
+	// 	testTime, err := time.Parse("4", fakeMinute)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	c := 0
+
+	// 	for _, i := range ugh.sleepIntervals {
+	// 		if testTime.Minute() >= i.start.Minute() && testTime.Minute() < i.end.Minute() {
+	// 			c++
+	// 		}
+	// 	}
+	// 	//minuteCounter = append(minuteCounter, c)
+	// 	log.Println(m, c)
+	// 	if c > sleepiestMinute {
+	// 		sleepiestMinute = c
+	// 		sleepiestIndex = m
+	// 	}
+	// }
+	// fmt.Println(sleepiestMinute)
+	// fmt.Println(sleepiestIndex * ugh.id)
+	guardsOnMinute := make([]map[int]int, 0)
+	minuteLazyGuardID := 0 // id
+	laziestMinute := 0
+	numberOfSleepsOnThisMinute := 0
 	for m := 0; m < 60; m++ {
 		fakeMinute := strconv.Itoa(m)
 
@@ -61,22 +88,38 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		c := 0
 
-		for _, i := range ugh.sleepIntervals {
-			if testTime.Minute() >= i.start.Minute() && testTime.Minute() < i.end.Minute() {
-				c++
+		minuteMap := make(map[int]int)
+
+		for _, g := range guards {
+			timesOnThisMinute := 0
+			for _, i := range g.sleepIntervals {
+				if testTime.Minute() >= i.start.Minute() && testTime.Minute() < i.end.Minute() {
+					timesOnThisMinute++
+				}
+			}
+			minuteMap[g.id] = timesOnThisMinute
+		}
+		// get the laziest of this minute and compare to cached dude
+		for id, t := range minuteMap {
+			if t > numberOfSleepsOnThisMinute {
+				minuteLazyGuardID = id
+				laziestMinute = m
+				numberOfSleepsOnThisMinute = t
 			}
 		}
-		//minuteCounter = append(minuteCounter, c)
-		log.Println(m, c)
-		if c > sleepiestMinute {
-			sleepiestMinute = c
-			sleepiestIndex = m
+
+		guardsOnMinute = append(guardsOnMinute, minuteMap)
+
+	}
+	for m, merp := range guardsOnMinute {
+		log.Println("Minute", m)
+		for id, hits := range merp {
+			log.Println(id, hits)
 		}
 	}
-	fmt.Println(sleepiestMinute)
-	fmt.Println(sleepiestIndex * ugh.id)
+	log.Println(minuteLazyGuardID, laziestMinute)
+	log.Println(minuteLazyGuardID * laziestMinute)
 
 }
 
